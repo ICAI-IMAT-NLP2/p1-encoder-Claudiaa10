@@ -25,9 +25,9 @@ class AttentionHead(nn.Module):
     def __init__(self, d_model: int, d_k: int, d_q: int, d_v: int):
         super(AttentionHead, self).__init__()
 
-        self.wq = None
-        self.wk = None
-        self.wv = None
+        self.wq = nn.Linear(d_q,d_model)
+        self.wk = nn.Linear(d_k,d_model)
+        self.wv = nn.Linear(d_v,d_model)
 
     def scaled_dot_product_attention(self, q, k, v):
         """Calculate the attention weights.
@@ -43,18 +43,18 @@ class AttentionHead(nn.Module):
         """
 
         # The dimension of the key tensor, used to scale the scores.
-        dim_k = None
+        dim_k = k.shape[-1]
 
         # Calculate the dot product between query and the transpose of key.
         # The result is then scaled by the square root of dim_k.
-        scores = None
+        scores = torch.matmul(q, k.transpose(1,2))/torch.sqrt(torch.tensor(dim_k))
 
         # Apply the softmax function to obtain the attention weights.
-        weights = None
+        weights = torch.softmax(scores,1)
 
         # Compute the output by performing a weighted sum of the value tensor
         # using the attention weights.
-        output = None
+        output = torch.matmul(weights,v)
 
         return output, weights
 
